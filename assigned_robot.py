@@ -70,6 +70,20 @@ def get_assigned_graph_menedger():
             users.append(int(userID))
     return users
 
+def get_assigned_graph_admin():
+    col = get_col_name()
+    maxAdminStart = sheet.find_cell('Админы').row + 5
+    maxAdminEnd =sheet.find_cell('Конец Админов').row
+    allRows = maxAdminEnd - maxAdminStart
+    users = []
+    for i in range(maxAdminStart, maxAdminEnd):
+        valueGraph = sheet.get_cell(row=f'{col}{i}')
+        if valueGraph == 'TRUE':
+            valueUsers = sheet.get_cell(row=f'A{i}')
+            userID = valueUsers.split(' ')[0].replace('[', '').replace(']', '')
+            users.append(int(userID))
+    return users
+
 def update_deal(users,deal,):
     bit.callMethod('crm.contact.update', ID=deal['CONTACT_ID'], fields={
                 'ASSIGNED_BY_ID': str(users[0]),
@@ -96,10 +110,19 @@ def handler(event, content):
     #event = prepare_body(event)
     #dealID = get_deal_id(event)
     dealID = 34241 
-    menedgers = get_assigned_graph_menedger()
     deal = bit.callMethod('crm.deal.get', ID=dealID)
     print(f'{deal=}')
     print(f'{menedgers=}')
+    if deal['CATEGORY_ID'] == '0': 
+        menedgers = get_assigned_graph_menedger()
+    
+    elif deal['CATEGORY_ID'] == '3':
+        menedgers = get_assigned_graph_admin()
+    else:
+        print('ID', deal['ID'])
+        print('category ', deal['CATEGORY_ID'])
+    
+
     #update_deal(menedgers,deal)
 
     main()
